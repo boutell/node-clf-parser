@@ -33,6 +33,14 @@ tap.test('parsing this example from the apache guys totally works', function (t)
   parsed = parse(line);
   // Milliseconds are not represented in the log format, so round them off
   t.equal(Math.floor(parsed.time_local.getTime() / 1000.0), Math.floor(now.getTime() / 1000.0), 'Dates and timezones are parsed correctly!');
+
+  parsed = parse(
+    'sitename.com:80 127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326'
+  );
+  t.equal(parsed.vhost_name, 'sitename.com', 'we have a vhost_name!');
+  t.equal(parsed.vhost_port, '80', 'we have a vhost_port!');
+  t.equal(parsed.remote_addr, '127.0.0.1', 'we have an ip address!');
+
   t.end();
 });
 

@@ -9,6 +9,15 @@ module.exports = function (line) {
     line = line.slice(0, line.length - 1);
   }
 
+  // Allow but do not require a virtual host name:port pair at the start
+  // ("vhost_combined" format as commonly found on Apache servers)
+  var matches = line.match(/^(\S+)\:(\d+) (.*)$/);
+  if (matches) {
+    parsed.vhost_name = matches[1];
+    parsed.vhost_port = matches[2];
+    line = matches[3];
+  }
+
   //
   // Pull out as many fields as possible
   //
