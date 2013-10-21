@@ -62,19 +62,21 @@ module.exports = function (line) {
     parsed[label] = field;
   });
 
-  var matches = parsed.request.match(/([A-Z]+)\s+(\S+)\s+([A-Z]+\/[\d\.]+)/);
-  if (matches) {
-    parsed.method = matches[1];
-    parsed.path = matches[2];
-    parsed.protocol = matches[3];
-  } else {
-    // 408 errors cannot be parsed in this way because the request was
-    // never fully received. Return empty strings so that common code
-    // performing regex matches on path does not have to worry about
-    // this special case as much
-    parsed.method = '';
-    parsed.path = '';
-    parsed.protocol = '';
+  if (parsed.request) {
+    matches = parsed.request.match(/([A-Z]+)\s+(\S+)\s+([A-Z]+\/[\d\.]+)/);
+    if (matches) {
+      parsed.method = parsed.http_method = matches[1];
+      parsed.path = matches[2];
+      parsed.protocol = matches[3];
+    } else {
+      // 408 errors cannot be parsed in this way because the request was
+      // never fully received. Return empty strings so that common code
+      // performing regex matches on path does not have to worry about
+      // this special case as much
+      parsed.method = '';
+      parsed.path = '';
+      parsed.protocol = '';
+    }
   }
 
   //
@@ -95,13 +97,6 @@ module.exports = function (line) {
       parsed[k] = null;
     }
   });
-
-  //
-  // If there was a request, then get the method
-  //
-  if (parsed.request) {
-    parsed.http_method = parsed.request.split(' ').shift();
-  }
 
   //
   // Parse the "local time" field into a javascript date object
@@ -163,7 +158,7 @@ module.exports = function (line) {
       //
       // TZ sign in standard string representations is REVERSED from sign in JavaScript:
       //
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset
+      //     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTimezoneOffset
       //
       // "Note that this means that the offset is positive if the local timezone is
       // behind UTC and negative if it is ahead.  For example, if your time zone
@@ -171,7 +166,8 @@ module.exports = function (line) {
       //
       // See also:
       //
-      // http://stackoverflow.com/questions/1091372/getting-the-clients-timezone-in-javascript/1091399#1091399
+      //      http://stackoverflow.com/questions/1091372/getting-the-clients-timezone-in-javascript/1091399#1091399
+      //
 
       offset.sign = str.substr(0, 1);
       offset.hh = parseInt(str.substr(1, 2), 10);
