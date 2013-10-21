@@ -67,6 +67,14 @@ module.exports = function (line) {
     parsed.method = matches[1];
     parsed.path = matches[2];
     parsed.protocol = matches[3];
+  } else {
+    // 408 errors cannot be parsed in this way because the request was
+    // never fully received. Return empty strings so that common code
+    // performing regex matches on path does not have to worry about
+    // this special case as much
+    parsed.method = '';
+    parsed.path = '';
+    parsed.protocol = '';
   }
 
   //
